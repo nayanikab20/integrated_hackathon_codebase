@@ -1,0 +1,40 @@
+Instructions - 
+1. Start with the file structure and code already present in the folder integrated_hackathon code.
+2. Make the code modular so that it can be plugged into a larger application
+
+Back End
+I want to create a financial competitor analysis that analyses the supplement documents from each bank to extract metrics and save them in a json. 
+The pipeline is as such
+1. For all the banks in the config, if the supplement document in the documents folder and the user prompt in the prompts folder exists, extract the metrics by running the entire pipeline present in pdf_analyser.
+2. Save the json output from the pdf_analyser inside the results folder.
+3. Also populate the consolidated results json. The structure of the consolidated json will be like this - 
+{
+  "banks": {
+    "J.P. Morgan": {
+      "metrics": {
+        "30+ Delinquency Rate (%)": { "Q1'2024": "", "Q2'2024": "", "Q3'2024": "", "Q4'2024": "", "Q1'2025": "" },
+        "90+ Delinquency Rate (%)": { "Q1'2024": "", "Q2'2024": "", "Q3'2024": "", "Q4'2024": "", "Q1'2025": "" },
+        "Net Credit Loss ($ in millions)": { "Q1'2024": "", "Q2'2024": "", "Q3'2024": "", "Q4'2024": "", "Q1'2025": "" },
+        "Net Credit Loss Rate (%)": { "Q1'2024": "", "Q2'2024": "", "Q3'2024": "", "Q4'2024": "", "Q1'2025": "" },
+        "Outstanding Balance ($ in millions)": { "Q1'2024": "", "Q2'2024": "", "Q3'2024": "", "Q4'2024": "", "Q1'2025": "" },
+        "Loss Reserve ($ in millions)": { "Q1'2024": "", "Q2'2024": "", "Q3'2024": "", "Q4'2024": "", "Q1'2025": "" }
+      },
+      "computed_metrics": {
+        "Coverage Ratio (%)": { "Q1'2024": "", "Q2'2024": "", "Q3'2024": "", "Q4'2024": "", "Q1'2025": "" },
+        "Net Credit Loss Coverage": { "Q1'2024": "", "Q2'2024": "", "Q3'2024": "", "Q4'2024": "", "Q1'2025": "" },
+        "Loan Loss Reserve ($ in millions)": { "Q1'2024": "", "Q2'2024": "", "Q3'2024": "", "Q4'2024": "", "Q1'2025": "" },
+        "Impairment Charge ($ in millions)": { "Q1'2024": "", "Q2'2024": "", "Q3'2024": "", "Q4'2024": "", "Q1'2025": "" }
+      }
+    },
+    // ... repeat for each bank ...
+    "Citi Bank": {
+      "metrics": { ... },
+      "computed_metrics": { ... }
+    }
+  }
+}
+
+Front End - 
+Create a React based front-end which has a button.
+When the button is clicked, it should call an API that triggers the pipeline to calculate metrics of all the banks mentioned above and return the consolidated json.
+

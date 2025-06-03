@@ -1,0 +1,101 @@
+# Financial Competitor Analysis App – Documentation for Cursor
+
+## Overview
+
+This application performs a financial competitor analysis by extracting credit-related metrics from quarterly supplemental reports provided by major banks. It consists of a modular backend for PDF analysis and a React-based frontend that triggers the analysis pipeline and displays results.
+
+## Base Folder
+
+**Start from the existing folder:** `integrated_hackathon_code`  
+All enhancements should build upon the existing structure and make the code modular for integration into larger systems.
+
+---
+
+## Backend Functionality
+
+### Objective
+
+Analyze supplemental financial documents (PDFs) from each bank and extract key metrics to generate:
+1. Bank-wise metric JSONs stored in the `results/` folder.
+2. A `consolidated_results.json` that aggregates metrics across all banks.
+
+### Pipeline
+
+1. Load `config.json` which contains a list of banks and the quarter of interest.
+2. For each bank in config:
+   - Check if the corresponding PDF document exists in the `documents/` folder.
+   - Check if a user-defined prompt exists in the `prompts/` folder.
+   - If both are present, run the extraction pipeline defined in `pdf_analyser.py`.
+3. Save the output for each bank as:
+   - Individual JSON in `results/{bank_name}/{bank_name}.json`
+   - Update the master `consolidated_results.json`
+
+### consolidated_results.json Structure
+
+```
+{
+  "banks": {
+    "J.P. Morgan": {
+      "metrics": {
+        "30+ Delinquency Rate (%)": { "Q1'2024": "", ..., "Q1'2025": "" },
+        "90+ Delinquency Rate (%)": { ... },
+        "Net Credit Loss ($ in millions)": { ... },
+        "Net Credit Loss Rate (%)": { ... },
+        "Outstanding Balance ($ in millions)": { ... },
+        "Loss Reserve ($ in millions)": { ... }
+      },
+      "computed_metrics": {
+        "Coverage Ratio (%)": { ... },
+        "Net Credit Loss Coverage": { ... },
+        "Loan Loss Reserve ($ in millions)": { ... },
+        "Impairment Charge ($ in millions)": { ... }
+      }
+    },
+    "Citi Bank": {
+      "metrics": { ... },
+      "computed_metrics": { ... }
+    }
+  }
+}
+```
+
+### Notes
+
+- Ensure all modules are reusable and follow clean interface principles.
+- Log the status of each bank's processing (e.g., skipped due to missing files, successfully processed).
+
+---
+
+## Frontend Functionality
+
+### Objective
+
+Provide a simple user interface to trigger the backend pipeline and view the consolidated results.
+
+### Features
+
+- **React-based frontend**
+- **Single button**: “Run Financial Analysis”
+  - On click, it triggers a REST API call to start the analysis pipeline.
+- **Display**: Once completed, display the parsed `consolidated_results.json` in a readable, expandable format on the screen.
+
+### API Contract
+
+- **Endpoint**: `/api/analyze`
+- **Method**: `POST`
+- **Response**: Full contents of `consolidated_results.json`
+
+### Additional Notes
+
+- Frontend must show loading indicator while analysis runs.
+- Handle and display errors clearly (e.g., missing files, parsing issues).
+- Use environment variables or a `.env` file to store configurable settings.
+
+---
+
+## Modular Design Expectations
+
+- The backend should expose core pipeline functions via callable Python modules and not just CLI scripts.
+- Separate utility functions for I/O, parsing, JSON generation, and validation.
+- Configurable quarter input passed via `config.json`.
+- All business logic should be testable via unit tests.

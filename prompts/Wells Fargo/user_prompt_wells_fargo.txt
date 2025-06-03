@@ -1,0 +1,23 @@
+You are a financial expert. Help me analyse the earnings call from Wells Fargo to extract the following metrics for credit card impairment analysis. 
+
+Rules to follow: 
+1. Precision = 2 decimal places unless mentioned otherwise.
+2. If it is a percentage metric, append '%' symbol
+3. If it a monetary value, concatenate $ symbol and use thousand separators. 
+4. If the monetary value is in millions or billions, Append that to the metric name in brackets. 
+
+I want to extract the following metrics for card services only.
+1. 30+ Delinquency Rate 
+2. 90+ Delinquency Rate  
+3. Net Credit Loss 
+4. Net Credit Loss Rate
+5. Outstanding Balance 
+6. Loss Reserve 
+
+Once you have extracted these values, calculate the following metrics. The formula is mentioned next to the metric name in parantheses. - 
+1. Coverage Ratio [Loss Reserve/Outstanding Balance*100] 
+2. Net Credit Loss Coverage [Loss Reserve/Net Credit Loss].  Compute with 1 decimel precision.
+3. Loan Loss Reserve [Current Financial Quarter Loss Reserve - Previous Financial Quarter Loss Reserve]
+4. Impairment Charge [Net Credit Loss + Loan Loss Reserve]
+
+Return the metrics in json structure.

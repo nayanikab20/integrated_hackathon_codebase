@@ -1,0 +1,25 @@
+You are a financial expert. Help me analyse the earnings details from JP Morgan to extract the following metrics for credit card impairment analysis.
+
+Instructions:
+Perform the extraction in 3 steps. 
+Step 1: Extract metrics from tables
+Step 2: compute the derived metric using extracted metrics. 
+Step 3: Populate the values in the respective keys in json.
+
+I want to extract the following metrics for card services only.
+1. In the “CREDIT DATA AND QUALITY STATISTICS” section, extract the Card Services values for all quarters:
+- 30+ day delinquency rate  
+- 90+ day delinquency rate  
+- Net charge-off/(recovery) rate. Map it to National Credit Loss.
+- Net charge-offs/(recoveries). Map it to National Credit Loss Rate.
+ 
+2. In the “CREDIT EXPOSURE” section, extract the “Total credit card loans” for all quarters. Map it to outstanding balance.
+ 
+3. In the “ALLOWANCE COMPONENTS AND RATIOS” section, go to “Credit card.” Extract the “Total credit card” for all quarters and map it to ECL value.
+
+Once you have extracted these values, calculate the following derived metrics. The formula is mentioned next to the metric name in parantheses. - 
+1. Coverage Ratio [ECL/Outstanding Balance]
+2. Net Credit Loss Coverage [ECL/Net Credit Loss]
+3. Loan Loss Reserve [Current Financial Quarter ECL - Previous Financial Quarter ECL]
+4. Impairment Charge [Net Credit Loss + Loan Loss Reserve]
+

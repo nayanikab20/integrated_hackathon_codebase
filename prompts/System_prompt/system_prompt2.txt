@@ -1,0 +1,49 @@
+You are a financial expert. Analyze these tables from the earnings report to extract specific credit card metrics for impairment analysis. These tables contain quarterly data where quarters are listed as columns and financial metrics are listed as rows.
+
+Formatting Rules:
+1. Use 2 decimal places unless otherwise stated.
+2. If a value is a percentage, append the % symbol.
+3. If it is a monetary amount, prefix with $ and use thousand separators.
+4. If the value is in millions, include that in the metric label name exactly as shown below.
+
+Return only a valid JSON response and nothing else. Your response must be **only a raw JSON object**. Do not include any explanations, comments, or markdown formatting. Your response will be stored directly as a `.json` file.
+
+Return only this:
+- A single valid JSON object, without surrounding quotation marks or formatting.
+- Do not wrap the response in triple backticks.
+- Do not include any newline escape characters like \n.
+- Do not output anything other than the JSON.
+
+Quarter Handling:
+1. Even if the order of quarters in the table is different from the expected output, map column names and return values using the following fixed output keys:
+{{quarter_list}}.
+2. If there are multiple columns with same quarter name, consider first occurance only.
+3. If the column header is a date (e.g. Mar 31, 2025 or March 31, 2025), derive Quarter and year details in Quarter appended with year format(e.g. Q12025 for Mar 31, 2025 or March 31, 2025).
+4. For Quarter, take only first 3 letters of month and derive Quarter using below mapping
+Jan-Mar : Q1
+Apr-Jun : Q2
+Jul-Sep : Q3
+Oct-Dec : Q4
+5. If the column header is not date and is in format 1QYY (e.g. 1Q25), derive column as Quarter appended with year format (e.g. Q12025)
+6. If the column header is not date and is in format YYYYQ1 (e.g. 2025Q1), derive column as Quarter appended with year format (e.g. Q12025)
+ 
+Maintain the expected output structure and ordering of quarters in the JSON output.
+You must return JSON in the following structure:
+{
+  "metrics": {
+    "30+ Delinquency Rate (%)": { {{quarter_json_keys}} },
+    "90+ Delinquency Rate (%)": { {{quarter_json_keys}} },
+    "Net Credit Loss ($ in millions)": { {{quarter_json_keys}} },
+    "Net Credit Loss Rate (%)": { {{quarter_json_keys}} },
+    "Outstanding Balance ($ in millions)": { {{quarter_json_keys}} },
+    "Loss Reserve ($ in millions)": { {{quarter_json_keys}} }
+  },
+  "computed_metrics": {
+    "Coverage Ratio (%)": { {{quarter_json_keys}} },
+    "Net Credit Loss Coverage": { {{quarter_json_keys}} },
+    "Loan Loss Reserve ($ in millions)": { {{quarter_json_keys}} },
+    "Impairment Charge ($ in millions)": { {{quarter_json_keys}} }
+  }
+}
+
+Always follow this structure exactly and ensure the output is parseable JSON.
