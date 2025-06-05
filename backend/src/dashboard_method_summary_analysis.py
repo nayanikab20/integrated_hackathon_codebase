@@ -193,6 +193,117 @@ def create_combined_tables_figure(coverage_df, ncl_coverage_df):
     
     return fig
 
+def add_text_annotation(fig, text, x_position=0.5, y_position=-0.20, 
+                       font_size=12, text_width=200, annotation_width=1500,
+                       bottom_margin=90, with_background=False, 
+                       bg_color="rgba(248, 249, 250, 0.9)", border_color="#e0e0e0"):
+    """
+    Add a text annotation below the existing figure content with proper text wrapping
+    
+    Parameters:
+    - fig: Plotly figure object
+    - text: Text to display
+    - x_position: X position (0-1, where 0.5 is center)
+    - y_position: Y position (negative values place it below the figure)
+    - font_size: Font size for the text (default: 12)
+    - text_width: Character width for text wrapping (default: 200)
+    - annotation_width: Width of the annotation box in pixels (default: 1500)
+    - bottom_margin: Bottom margin to add for the annotation (default: 90)
+    - with_background: Whether to show background box (default: False)
+    - bg_color: Background color if with_background=True
+    - border_color: Border color if with_background=True
+    """
+    # Break long text into multiple lines for better readability
+    import textwrap
+    wrapped_text = "<br>".join(textwrap.wrap(text, width=text_width))
+    
+    # Build annotation parameters
+    annotation_params = {
+        'text': wrapped_text,
+        'x': x_position,
+        'y': y_position,
+        'xref': "paper",
+        'yref': "paper",
+        'showarrow': False,
+        'font': dict(size=font_size, color="#2c3e50"),
+        'align': "center",
+        'width': annotation_width,
+        'xanchor': "center"
+    }
+    
+    # Add background styling if requested
+    if with_background:
+        annotation_params.update({
+            'bgcolor': bg_color,
+            'bordercolor': border_color,
+            'borderwidth': 1,
+            'borderpad': 10
+        })
+    
+    fig.add_annotation(**annotation_params)
+    
+    # Adjust the bottom margin to accommodate the annotation
+    current_margin = fig.layout.margin
+    fig.update_layout(
+        margin=dict(
+            l=current_margin.l if current_margin.l else 20,
+            r=current_margin.r if current_margin.r else 20,
+            t=current_margin.t if current_margin.t else 80,
+            b=bottom_margin
+        )
+    )
+    
+    return fig
+
+def add_download_button(fig, button_text="Download", x_position=0.95, y_position=0.95):
+    """
+    Add a download button to the figure that can save as PDF
+    
+    Parameters:
+    - fig: Plotly figure object
+    - button_text: Text to display on button
+    - x_position: X position (0-1, where 0.95 is top-right)
+    - y_position: Y position (0-1, where 0.95 is top-right)
+    """
+    
+    # Add download button as an annotation with custom styling
+    fig.add_annotation(
+        text=f"📥 {button_text}",
+        x=x_position,
+        y=y_position,
+        xref="paper",
+        yref="paper",
+        showarrow=False,
+        font=dict(size=12, color="white", family="Arial, sans-serif"),
+        align="center",
+        bgcolor="#28a745",  # Bootstrap green color
+        bordercolor="#1e7e34",  # Darker green border
+        borderwidth=2,
+        borderpad=8,
+        xanchor="center",
+        yanchor="middle",
+        # Make it look like a button
+        clicktoshow=False
+    )
+    
+    # Add JavaScript for PDF download functionality
+    fig.update_layout(
+        annotations=fig.layout.annotations + (
+            dict(
+                text='<button onclick="downloadPDF()" style="background-color:#28a745; color:white; border:2px solid #1e7e34; padding:8px 16px; border-radius:4px; cursor:pointer; font-size:12px; font-family:Arial;">📥 Download</button>',
+                x=x_position,
+                y=y_position,
+                xref="paper",
+                yref="paper",
+                showarrow=False,
+                bgcolor="rgba(0,0,0,0)",  # Transparent background
+                borderwidth=0
+            ),
+        )
+    )
+    
+    return fig
+
 def create_line_chart_with_table(banks_data, metric_name, metric_category, quarters, title, ylabel):
     """Create line chart with summary table using Plotly"""
     
@@ -367,14 +478,16 @@ class DashboardComponents:
         print(f"🌐 Opening in browser: {html_path}")
         return html_path
     
+    
     def _generate_html(self):
-        """Generate complete HTML with all components"""
+        """Generate complete HTML with single top download button"""
         html_content = """
         <!DOCTYPE html>
         <html>
         <head>
             <title>Banking Dashboard - Credit Risk Metrics</title>
             <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
             <style>
                 body { 
                     font-family: Arial, sans-serif; 
@@ -382,15 +495,39 @@ class DashboardComponents:
                     background-color: #f8f9fa; 
                     line-height: 1.6;
                 }
+                .dashboard-header {
+                    position: relative;
+                    margin-bottom: 30px;
+                }
                 .dashboard-title { 
                     text-align: center; 
                     color: #2c3e50; 
-                    margin-bottom: 30px; 
                     padding: 20px;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: #00aeef;
                     color: white;
                     border-radius: 10px;
                     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    margin: 0;
+                }
+                .download-btn {
+                    position: absolute;
+                    top: 20px;
+                    right: 20px;
+                    background-color: #28a745;
+                    color: white;
+                    border: 2px solid #1e7e34;
+                    padding: 10px 20px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-family: Arial, sans-serif;
+                    font-weight: bold;
+                    z-index: 1000;
+                    transition: background-color 0.3s;
+                }
+                .download-btn:hover {
+                    background-color: #218838;
+                    transform: translateY(-1px);
                 }
                 .section { 
                     margin: 30px 0; 
@@ -407,15 +544,22 @@ class DashboardComponents:
                     background-color: #fafafa;
                 }
                 .component-title {
-                    color: #34495e;
+                    color: #00aeef;
                     border-bottom: 2px solid #3498db;
                     padding-bottom: 10px;
                     margin-bottom: 20px;
                 }
+                @media print {
+                    .download-btn { display: none; }
+                }
             </style>
         </head>
         <body>
-            <h1 class="dashboard-title">🏦 Banking Dashboard - Credit Risk Metrics</h1>
+            <div id="dashboard-content">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title">🏦 Competitor Analysis Dashboard</h1>
+                    <button class="download-btn" onclick="downloadDashboardPDF()">📥 Download</button>
+                </div>
         """
         
         # Add each component to HTML
@@ -438,6 +582,40 @@ class DashboardComponents:
             """
         
         html_content += """
+            </div>
+            
+            <script>
+                // Download entire dashboard as PDF
+                function downloadDashboardPDF() {
+                    const element = document.getElementById('dashboard-content');
+                    const opt = {
+                        margin: 0.5,
+                        filename: 'banking_dashboard_analysis.pdf',
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { 
+                            scale: 2, 
+                            useCORS: true,
+                            logging: false,
+                            allowTaint: true
+                        },
+                        jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
+                        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                    };
+                    
+                    // Show loading state
+                    const btn = document.querySelector('.download-btn');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '⏳ Generating...';
+                    btn.disabled = true;
+                    
+                    html2pdf().set(opt).from(element).save().then(function() {
+                        // Reset button
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    });
+                }
+            </script>
+            
             <div class="section">
                 <p style="text-align: center; color: #7f8c8d; font-style: italic;">
                     Generated with Plotly • Interactive Dashboard • Hover for details
@@ -473,10 +651,23 @@ def create_dashboard(json_file_path, display_mode="save_and_open"):
     # 1. Create combined tables
     coverage_df = create_coverage_table_data(banks_data, quarters)
     ncl_coverage_df = create_ncl_coverage_table_data(banks_data, quarters)
+
+    ncl_commentary = ("Coverage rates increased across all major banks in Q1 2025, reflecting heightened credit risk management amid economic uncertainty. Synchrony led with the most significant increase of 49 basis points to 11.78% followed by JPMorgan's 44 basis point rise to 6.71%. WellsFargo and Bank of America posted more modest increases of 25 and 19 basis points respectively.")
     
     if not coverage_df.empty or not ncl_coverage_df.empty:
+        # Add the annotation paragraph
         tables_fig = create_combined_tables_figure(coverage_df, ncl_coverage_df)
-        dashboard.add_component(tables_fig, "📊 Coverage Rates & NCL Coverage")
+
+        tables_fig = add_text_annotation(
+            tables_fig, 
+            ncl_commentary,
+            y_position=-0.20,
+            font_size=12,
+            text_width=200,
+            annotation_width=1500,
+            with_background=False
+        )
+    dashboard.add_component(tables_fig, "📊 Coverage Rates & NCL Coverage")
     
     # 2. NCL Rate Chart
     ncl_chart = create_line_chart_with_table(
@@ -484,6 +675,25 @@ def create_dashboard(json_file_path, display_mode="save_and_open"):
         'NCL rates have increased in Q1\'25 in line with majority of the US peers',
         'NCL Rate (%)'
     )
+
+    # Add commentary specifically under the right-side table
+    ncl_commentary = ("NCL rates show divergent trends in Q1 2025. Synchrony declined 7 bps to 6.38%, "
+                    "while JPMorgan, WellsFargo, and Bank of America increased by 28, 27, and 26 bps respectively.")
+
+    ncl_chart = add_text_annotation(
+        ncl_chart, 
+        ncl_commentary,
+        x_position=0.85,      # Position over the right table (center of 0.7-1.0 range)
+        y_position=-0.15,     # Position below the table
+        font_size=12,         # Smaller font for table area
+        text_width=60,        # Shorter line width for narrow table area
+        annotation_width=400, # Smaller annotation width to fit table area
+        bottom_margin=100,    # Increase margin for the annotation
+        # with_background=True, # Add background for better readability
+        bg_color="rgba(240, 248, 255, 0.9)",  # Light blue background
+        border_color="#d0d0d0"
+    )
+    
     dashboard.add_component(ncl_chart, "📈 Net Credit Loss (NCL) Rates")
     
     # 3. 30+ Days Delinquency Chart
