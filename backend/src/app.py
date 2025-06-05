@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import os
 from utils import create_batch_config_from_config, create_consolidated_results
 from pdf_analyzer import PDFAnalyzer  # Assuming you have a PDFAnalyzer class for processing
+from dashboard_method_summary_analysis import create_dashboard
 import json
 
 app = Flask(__name__)
@@ -58,10 +59,36 @@ def analyze():
 
     with open(consolidated_output_path, 'r') as f:
         consolidated_results = json.load(f)
-
+    
     if consolidated_results:
-        return jsonify({"message": "Analysis completed successfully", "output_path": consolidated_output_path, "consolidated_results": consolidated_results}), 200
+        try:
+            # Create dashboard with different display options
+            print("🚀 Creating Banking Dashboard...")
+            
+            # Option 1: Save and open in browser (recommended)
+            dashboard = create_dashboard(consolidated_output_path, display_mode="save_and_open")
+            
+            # Additional options you can use:
+            print("\n🎯 Additional Display Options:")
+            print("dashboard.list_components()           # List all components")
+            print("dashboard.show_individual(0)         # Show first component only")
+            print("dashboard.show_all_separate()        # Show all in separate tabs")
+            print("dashboard.save_html('custom.html')   # Save with custom filename")
+
+            # Read HTML file content into a string
+            html_path = os.path.join(base_dir, "backend", "src", "banking_dashboard_complete.html")
+            with open(html_path, "r", encoding="utf-8") as file:
+                html_data = file.read()
+
+                return jsonify({"message": "Analysis completed successfully", "output_path": consolidated_output_path, "consolidated_results": consolidated_results, "report_html": html_data}), 200
+            
+        except Exception as e:
+            print(f"❌ An error occurred: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({"message": "Analysis completed successfully", "output_path": consolidated_output_path, "consolidated_results": consolidated_results}), 200
     else:
+        print(f"❌ Error: File '{consolidated_output_path}' not found.") 
         return jsonify({"error": "No results found"}), 404
 
 if __name__ == '__main__':
