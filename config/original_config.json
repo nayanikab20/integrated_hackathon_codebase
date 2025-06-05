@@ -1,0 +1,23 @@
+{ "all_bank_names": ["JP Morgan", "Wells Fargo", "Bank of America", "Synchrony", "Barclays", "Capital One", "Citi Bank"],
+  "latest_quarter": "Q1' 2025",
+  
+  "Metrics": ["30+ Delinquency Rate", "90+ Delinquency Rate", "Net Credit Loss", "Net Credit Loss Rate", "Outstanding Balance", "Loss Reserve" ],
+  
+  "Calculated Metrics": {
+    "Coverage Ratio": {
+       "Formula": "Loss Reserve/Outstanding Balance*100"
+    },
+    "Net Credit Loss Coverage":{
+        "Formula": "Loss Reserve/Net Credit Loss",
+        "Rule": "Compute with 1 decimel precision."
+    },
+    "Loan Loss Reserve": {
+       "Formula": "Current Financial Quarter Loss Reserve - Previous Financial Quarter Loss Reserve",
+       "Rule": "'Null' if value for formula invalid or does not exist" 
+    },
+    "Impairment Charge":{
+        "Formula": "Net Credit Loss + Loan Loss Reserve",
+        "Rule": "If Loan Loss Reserve is 'Null', do not compute Impairment Charge"
+    }
+  }
+}

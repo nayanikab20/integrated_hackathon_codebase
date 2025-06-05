@@ -20,22 +20,20 @@ def create_batch_config_from_config(config_path: str, base_dir: str) -> List[Dic
     Returns:
         List of config dicts for batch processing.
     """
+    batch_config = []
     with open(config_path, 'r') as f:
         config = json.load(f)
     
-    banks = config.get("banks", []) or config.get("bank_names", [])
+    banks = config.get("requested_bank_names", [])
     latest_quarter = config.get("latest_quarter")
     
-    if not banks or not latest_quarter:
-        raise ValueError("Config file must contain 'banks' or 'bank_names' and 'latest_quarter'.")
-
-    batch_config = []
+    # Check if the documents directory for the latest_quarter exists for each bank
     for bank in banks:
-        bank_folder = bank.replace(" ", "_")
-        
-        # Construct the path to the documents directory for the current bank and quarter
         documents_dir = os.path.join(base_dir, "documents", latest_quarter, bank)
-        
+        if not os.path.exists(documents_dir):
+            # raise FileNotFoundError(f"Data does not exist for quarter '{latest_quarter}' for bank '{bank}'. Expected directory: {documents_dir}")
+            return
+
         # Find the PDF file that contains "supplement" in its name
         pdf_files = [f for f in os.listdir(documents_dir) if "supplement" in f.lower() and f.endswith('.pdf')]
         
@@ -46,9 +44,9 @@ def create_batch_config_from_config(config_path: str, base_dir: str) -> List[Dic
         # Assuming we take the first matching PDF file
         pdf_path = os.path.join(documents_dir, pdf_files[0])
         
-        user_prompt_path = os.path.join(base_dir, "prompts", bank, f"user_prompt_{bank_folder.lower()}.txt")
+        user_prompt_path = os.path.join(base_dir, "prompts", bank, f"user_prompt.txt")
         system_prompt_path = os.path.join(base_dir, "prompts", "System_prompt", "system_prompt2.txt")
-        output_path = os.path.join(base_dir, "results", latest_quarter, bank, f"{bank_folder}.json")
+        output_path = os.path.join(base_dir, "results", latest_quarter, bank, f"{bank}.json")
         
         ensure_results_subdirs(output_path)  # Ensure the output directory exists
         

@@ -10,14 +10,26 @@ app = Flask(__name__)
 def analyze():
     data = request.json
     bank_names = data.get('bank_names')  # Get the list of bank names
+    latest_quarter = data.get('quarter')
     base_dir = "D:\office_Work_shennanigans\hackathon\integrated_hackathon_codebase"
     config_path = os.path.join(base_dir, "config", "config.json") # add a step where the data from the request populates the config
 
-    if not bank_names or not config_path or not base_dir:
-        return jsonify({"error": "Missing bank_names, config_path, or base_dir"}), 400
+    if not bank_names or not latest_quarter:
+        return jsonify({"error": "Missing bank_names or latest_quarter"}), 400
+
+    # Add requested bank names and quarterto the configuration
+    # with open(config_path, 'r') as f:
+    #     config = json.load(f)
+    config = {}
+    config['requested_bank_names'] = bank_names
+    config['latest_quarter'] = latest_quarter
+    with open(config_path, 'w') as f:
+        json.dump(config, f)
 
     # Create batch config based on the provided bank names
     batch_config = create_batch_config_from_config(config_path, base_dir)
+    if not batch_config:
+        return jsonify({"error": "Missing data"}), 400
 
     # Initialize the PDFAnalyzer
     analyzer = PDFAnalyzer(config_path=config_path)
@@ -40,9 +52,7 @@ def analyze():
                 return jsonify({"error": f"Failed to analyze {config['bank']}: {str(e)}"}), 500
 
     # Create consolidated results
-    with open(config_path, 'r') as f:
-        config = json.load(f)
-    latest_quarter = config.get("latest_quarter")  # This should be dynamically fetched from your config
+    # latest_quarter = config.get("latest_quarter")  # This should be dynamically inserted into the config
     consolidated_output_path = os.path.join(base_dir, "results", latest_quarter, "consolidated_results.json")
     create_consolidated_results(batch_config, consolidated_output_path)
 
@@ -55,4 +65,4 @@ def analyze():
         return jsonify({"error": "No results found"}), 404
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)

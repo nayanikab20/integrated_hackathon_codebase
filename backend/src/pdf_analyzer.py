@@ -259,7 +259,7 @@ class PDFAnalyzer:
         Returns:
             List of quarters in chronological order
         """
-        qtr, year = latest_quarter.split("'")
+        qtr, year = latest_quarter[0:2], latest_quarter[2:]
         qtr_num = int(qtr[1])  # Extract the number from Q1, Q2, etc.
         year = int(year)
 
@@ -270,7 +270,7 @@ class PDFAnalyzer:
             if q <= 0:
                 q += 4
                 y -= 1
-            quarters.append(f"Q{q}'{y}")
+            quarters.append(f"Q{q}{y}")
         
         return list(reversed(quarters))  # Maintain chronological order
 
